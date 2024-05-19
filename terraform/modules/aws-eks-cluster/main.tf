@@ -43,7 +43,38 @@ resource "aws_eks_cluster" "cluster" {
   depends_on = [
     aws_iam_role_policy_attachment.aws-eks-cluster-policy-attachment
   ]
+
+  access_config {
+    authentication_mode = "API_AND_CONFIG_MAP"
+  }
 }
+
+# EKS Cluster access entry iam role
+# resource "aws_iam_role" "example" {
+#   name = "eks-cluster-access-entry-iac"
+
+#   # Terraform's "jsonencode" function converts a
+#   # Terraform expression result to valid JSON syntax.
+#   assume_role_policy = jsonencode({
+#         "Version": "2012-10-17",
+#         "Statement": [
+#             {
+#                 "Effect": "Allow",
+#                 "Principal": {
+#                     "AWS": aws_eks_cluster.cluster.arn
+#                 },
+#                 "Action": "sts:AssumeRole"
+#             }
+#         ]
+#     })
+# }
+
+# EKS Cluster Access Entry
+# resource "aws_eks_access_entry" "example" {
+#   cluster_name      = aws_eks_cluster.cluster.name
+#   principal_arn     = aws_iam_role.example.arn
+#   type              = "STANDARD"
+# }
 
 # IAM role for EKS cluster node group
 resource "aws_iam_role" "node_group_iam_role" {
