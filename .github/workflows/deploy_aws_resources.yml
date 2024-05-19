@@ -69,8 +69,8 @@ jobs:
       - name: apply ingress and namespace k8s resources
         working-directory: ./eks
         run: |
-          kubectl apply -f eks/namespace.yaml
-          kubectl apply -f eks/ingress.yaml
+          kubectl apply -f namespace.yaml
+          kubectl apply -f ingress.yaml
       
     #   # Test bash script
     #   - name: Test bash script
