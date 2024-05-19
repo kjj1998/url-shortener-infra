@@ -85,9 +85,9 @@ jobs:
 
       - name: add IAM for cluster access
         run: eksctl create iamidentitymapping \ 
-          --cluster ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} \ 
-          --arn arn:aws:iam::271407076537:role/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 \ 
-          --no-duplicate-arns --username admin-1
+          --cluster=${{ env.EKS_CLUSTER_NAME }} --region=${{ env.AWS_REGION }} \ 
+          --arn=arn:aws:iam::271407076537:role/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 \ 
+          --no-duplicate-arns --username=admin-1
       # - name: Update cluster authentication mode
       #   run: aws eks update-cluster-config --name ${{ env.EKS_CLUSTER_NAME }} --access-config authenticationMode=API_AND_CONFIG_MAP
       
