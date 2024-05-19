@@ -30,7 +30,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4.0.1
         with:
-          role-to-assume: arn:aws:iam::271407076537:role/GitHubAction-url-shortener # change to reflect your IAM role’s ARN
+          role-to-assume: arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra # change to reflect your IAM role’s ARN
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
       
