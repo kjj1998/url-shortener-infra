@@ -84,8 +84,9 @@ jobs:
           sudo mv /tmp/eksctl /usr/local/bin
 
       - name: add IAM for cluster access
-        run: eksctl create iamidentitymapping --cluster ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --arn arn:aws:iam::271407076537:role/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --no-duplicate-arns --username admin
-      # - name: Update cluster authentication mode
+        # run: eksctl create iamidentitymapping --cluster ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --arn arn:aws:iam::271407076537:role/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --no-duplicate-arns --username admin
+        run: aws eks create-access-entry --cluster-name ${{ env.EKS_CLUSTER_NAME }} --principal-arn arn:aws:iam::271407076537:role/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8:role/jjkoh --type STANDARD
+        # - name: Update cluster authentication mode
       #   run: aws eks update-cluster-config --name ${{ env.EKS_CLUSTER_NAME }} --access-config authenticationMode=API_AND_CONFIG_MAP
       
     #   # Test bash script
@@ -97,3 +98,6 @@ jobs:
     #   # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
     #   - name: Terraform Apply
     #     run: terraform apply -auto-approve -input=false
+
+    Access entry: arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8
+    Access entry: arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8
