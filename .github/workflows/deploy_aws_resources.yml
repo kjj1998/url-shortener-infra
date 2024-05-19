@@ -57,13 +57,19 @@ jobs:
 
       # Apply the changes required to reach the desired state of the configuration
       - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -auto-approve
 
       - name: Kubectl tool installer
         uses: Azure/setup-kubectl@v4.0.0
       
       - name: update kubeconfig
         run: aws eks update-kubeconfig --name url-shortener --region ${{ env.AWS_REGION }}
+
+      - name: apply ingress and namespace k8s resources
+        working-directory: ./eks
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/ingress.yaml
       
     #   # Test bash script
     #   - name: Test bash script
