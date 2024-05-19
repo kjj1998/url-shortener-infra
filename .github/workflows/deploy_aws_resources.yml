@@ -8,6 +8,7 @@ on:
     branches: [ master ]
 env:
   AWS_REGION : ap-southeast-1 # Change to reflect your Region
+  EKS_CLUSTER_NAME: url-shortener-cluster-iac # Change to reflect your EKS cluster name
 
 # Permission can be added at job level or workflow level    
 permissions:
@@ -63,7 +64,7 @@ jobs:
         uses: Azure/setup-kubectl@v4.0.0
       
       - name: update kubeconfig
-        run: aws eks update-kubeconfig --name url-shortener --region ${{ env.AWS_REGION }}
+        run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
       - name: apply ingress and namespace k8s resources
         working-directory: ./eks
