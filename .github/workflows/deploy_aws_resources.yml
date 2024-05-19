@@ -54,6 +54,32 @@ jobs:
       # Generates an execution plan for Terraform
       - name: Terraform Plan
         run: terraform plan -input=false
+  
+  apply_k8s_namespace_and_ingress:
+    name: 'Apply k8s namespace and ingress resources'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./eks
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          role-to-assume: arn:aws:iam::271407076537:role/GitHubAction-url-shortener # change to reflect your IAM role’s ARN
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Kubectl tool installer
+        uses: Azure/setup-kubectl@v4.0.0
+
+      - name: update kubeconfig
+        run: aws eks update-kubeconfig --name url-shortener --region ${{ env.AWS_REGION }}
       
     #   # Test bash script
     #   - name: Test bash script
