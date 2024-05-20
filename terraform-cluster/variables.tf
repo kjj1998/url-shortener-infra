@@ -5,7 +5,7 @@ variable "aws_region" {
 }
 
 variable "eks_cluster_name" {
-    description = "The EKS cluster name"
-    type        = string
-    default = "url-shortener-cluster-iac"
+  description = "The EKS cluster name"
+  type        = string
+  default     = "url-shortener-cluster-iac"
 }
