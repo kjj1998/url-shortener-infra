@@ -17,6 +17,7 @@ data "aws_eks_cluster" "cluster" {
 
 data "aws_caller_identity" "current" {}
 
+
 # IAM role for AWS Load Balancer Controller
 resource "aws_iam_role" "alb_iam_role" {
   name = "AmazonEKSLoadBalancerControllerRole3"
