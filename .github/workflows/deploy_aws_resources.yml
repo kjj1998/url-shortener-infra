@@ -60,64 +60,11 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
-
-  deploy_eks_cluster_resources:
-    name: 'Deploy EKS cluster resources'
-    runs-on: ubuntu-latest
-    needs: deploy_aws_resources
-
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./terraform-cluster
-
-    steps:
-      - name: Git clone the repository
-        uses: actions/checkout@v4
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.1
-        with:
-          role-to-assume: arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra # change to reflect your IAM role’s ARN
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ env.AWS_REGION }}
-      
-      # Hello from AWS: WhoAmI
-      - name: Sts GetCallerIdentity
-        run: aws sts get-caller-identity
-
-      - name: Setup Terraform with specified version on the runner
-        uses:  hashicorp/setup-terraform@v3.0.0
-        with:
-          terraform_version: "1.7.0"
-      
-      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-      - name: Terraform init
-        run: terraform init
-      
-      # Checks that all Terraform configuration files adhere to a canonical format
-      - name: Terraform Format
-        run: terraform fmt -check
-
-      # Generates an execution plan for Terraform
-      - name: Terraform Plan
-        run: terraform plan -input=false
-
-      # Apply the changes required to reach the desired state of the configuration
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-
       - name: Kubectl tool installer
         uses: Azure/setup-kubectl@v4.0.0
       
       - name: update kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
-
-      - name: apply ingress and namespace k8s resources
-        working-directory: ./eks
-        run: |
-          kubectl apply -f namespace.yaml
-          kubectl apply -f ingress.yaml
 
       - name: Install eksctl
         run: |
@@ -135,3 +82,32 @@ jobs:
         run: |
           aws eks create-access-entry --cluster-name ${{ env.EKS_CLUSTER_NAME }} --principal-arn arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --type STANDARD
           aws eks associate-access-policy --cluster-name ${{ env.EKS_CLUSTER_NAME }} --principal-arn arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --access-scope type=cluster --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy
+      
+      - name: Set working directory to terraform-cluster
+        run: cd ../terraform-cluster    
+          
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform init
+        run: terraform init
+    
+      # Checks that all Terraform configuration files adhere to a canonical format
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      # Generates an execution plan for Terraform
+      - name: Terraform Plan
+        run: terraform plan -input=false
+
+      # Apply the changes required to reach the desired state of the configuration
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: apply ingress and namespace k8s resources
+        working-directory: ./eks
+        run: |
+          kubectl apply -f namespace.yaml
+          kubectl apply -f ingress.yaml
+      
+     
+
+     
