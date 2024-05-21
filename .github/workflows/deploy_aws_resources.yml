@@ -42,7 +42,7 @@ jobs:
       - name: Setup Terraform with specified version on the runner
         uses:  hashicorp/setup-terraform@v3.0.0
         with:
-          terraform_version: "1.7.0"
+          terraform_version: "1.8.3"
       
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform init
