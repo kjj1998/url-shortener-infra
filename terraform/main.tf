@@ -75,28 +75,33 @@ module "eks" {
   ]
 }
 
-# data "aws_eks_cluster_auth" "cluster" {
-#   name = module.eks.cluster_name
-# }
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks.cluster_name
+}
 
-# provider "helm" {
-#   kubernetes {
-#     host                   = module.eks.cluster_endpoint
-#     token                  = data.aws_eks_cluster_auth.cluster.token
-#     cluster_ca_certificate = base64decode(module.eks.cluster_ca_cert)
-#   }
-# }
+provider "helm" {
+  kubernetes {
+    host = module.eks.cluster_endpoint
+    # token                  = data.aws_eks_cluster_auth.cluster.token
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+      command     = "aws"
+    }
+    cluster_ca_certificate = base64decode(module.eks.cluster_ca_cert)
+  }
+}
 
-# # Remember to remove created load balancer because it is not managed by terraform by deleting the ingress k8s resources
-# module "alb" {
-#   source                   = "./modules/aws-alb"
-#   cluster_name             = module.eks.cluster_name
-#   region                   = "ap-southeast-1"
-#   namespace                = "kube-system"
-#   alb_service_account_name = "aws-load-balancer-controller3"
-#   helm_chart_name          = "aws-load-balancer-controller"
-#   helm_chart_release_name  = "aws-load-balancer-controller"
-#   helm_chart_version       = "1.7.2"
+# Remember to remove created load balancer because it is not managed by terraform by deleting the ingress k8s resources
+module "alb" {
+  source                   = "./modules/aws-alb"
+  cluster_name             = module.eks.cluster_name
+  region                   = "ap-southeast-1"
+  namespace                = "kube-system"
+  alb_service_account_name = "aws-load-balancer-controller3"
+  helm_chart_name          = "aws-load-balancer-controller"
+  helm_chart_release_name  = "aws-load-balancer-controller"
+  helm_chart_version       = "1.7.2"
 
-#   depends_on = [module.eks]
-# }
+  depends_on = [module.eks]
+}
