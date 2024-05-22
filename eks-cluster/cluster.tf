@@ -78,9 +78,9 @@ provider "helm" {
   }
 }
 
-data "aws_eks_cluster" "cluster" {
-  name = module.eks.cluster_name
-}
+# data "aws_eks_cluster" "cluster" {
+#   name = module.eks.cluster_name
+# }
 
 data "aws_caller_identity" "current" {}
 
@@ -88,19 +88,21 @@ data "aws_caller_identity" "current" {}
 resource "aws_iam_role" "alb_iam_role" {
   name = "AmazonEKSLoadBalancerControllerRole3"
 
+  
+
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
       {
         "Effect" : "Allow",
         "Principal" : {
-          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}"
+          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(module.eks.oidc_identity_issuer, "https://", "")}"
         },
         "Action" : "sts:AssumeRoleWithWebIdentity",
         "Condition" : {
           "StringEquals" : {
-            "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:sub" : "system:serviceaccount:kube-system:aws-load-balancer-controller3",
-            "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:aud" : "sts.amazonaws.com"
+            "${replace(module.eks.oidc_identity_issuer, "https://", "")}:sub" : "system:serviceaccount:kube-system:aws-load-balancer-controller3",
+            "${replace(module.eks.oidc_identity_issuer, "https://", "")}:aud" : "sts.amazonaws.com"
           }
         }
       }
@@ -108,10 +110,10 @@ resource "aws_iam_role" "alb_iam_role" {
   })
 
   tags = {
-    "alpha.eksctl.io/cluster-name"                = data.aws_eks_cluster.cluster.name
+    "alpha.eksctl.io/cluster-name"                = module.eks.cluster_name
     "alpha.eksctl.io/iamserviceaccount-name"      = "kube-system/aws-load-balancer-controller3"
     "alpha.eksctl.io/eksctl-version"              = "0.175.0"
-    "eksctl.cluster.k8s.io/v1alpha1/cluster-name" = data.aws_eks_cluster.cluster.name
+    "eksctl.cluster.k8s.io/v1alpha1/cluster-name" = module.eks.cluster_name
   }
 }
 
