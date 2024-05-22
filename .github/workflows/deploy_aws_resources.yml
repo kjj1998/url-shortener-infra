@@ -82,10 +82,7 @@ jobs:
         run: |
           aws eks create-access-entry --cluster-name ${{ env.EKS_CLUSTER_NAME }} --principal-arn arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --type STANDARD
           aws eks associate-access-policy --cluster-name ${{ env.EKS_CLUSTER_NAME }} --principal-arn arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --access-scope type=cluster --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy
-      
-      # - name: Set working directory to terraform-cluster
-      #   run: cd ../terraform-cluster    
-          
+
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform init
         working-directory: ./terraform-cluster
