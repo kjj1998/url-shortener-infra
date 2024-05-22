@@ -15,12 +15,12 @@ terraform {
     region         = "ap-southeast-1"
     dynamodb_table = "terraform-remote-locks-url-shortener"
     encrypt        = true
-    profile = "admin-1"
+    profile        = "admin-1"
   }
 }
 
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
   profile = "admin-1"
 }
 
@@ -39,30 +39,6 @@ module "vpc" {
   private_subnet_route_table_2_name = "url-shortener-cluster-vpc-rtb-private-2-iac"
 }
 
-module "elasticache" {
-  source                            = "./modules/aws-elasticache"
-  elasticache_security_group_vpc_id = module.vpc.vpc_id
-  private_subnet_ids = [
-    module.vpc.private_subnet_1_id,
-    module.vpc.private_subnet_2_id,
-  ]
-  elasticache_security_group_name  = "url-shortener-cache-security-group-iac"
-  elasticache_replication_group_id = "url-shortener-cache-non-cluster-iac"
-  elasticache_subnet_group_name    = "url-shortener-cache-subnet-group-iac"
-  cluster_security_group_id        = module.eks.cluster_security_group
-}
-
-module "rds" {
-  source                    = "./modules/aws-rds"
-  rds_security_group_vpc_id = module.vpc.vpc_id
-  rds_security_group_name   = "url-shortener-rds-security-group-iac"
-  public_subnet_ids = [
-    module.vpc.public_subnet_1_id,
-    module.vpc.public_subnet_2_id,
-  ]
-  rds_subnet_group_name = "url-shortener-rds-subnet-group-iac"
-}
-
 module "eks" {
   source = "./modules/aws-eks-cluster"
   cluster_public_subnets_ids = [
@@ -79,6 +55,16 @@ data "aws_eks_cluster_auth" "cluster" {
   name = module.eks.cluster_name
 }
 
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_ca_cert)
+  exec {
+    api_version = "client.authentication.k8s.io/v1alpha1"
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+    command     = "aws"
+  }
+}
+
 provider "helm" {
   kubernetes {
     host = module.eks.cluster_endpoint
@@ -92,6 +78,64 @@ provider "helm" {
   }
 }
 
+data "aws_eks_cluster" "cluster" {
+  name = module.eks.cluster_name
+}
+
+data "aws_caller_identity" "current" {}
+
+# IAM role for AWS Load Balancer Controller
+resource "aws_iam_role" "alb_iam_role" {
+  name = "AmazonEKSLoadBalancerControllerRole3"
+
+  assume_role_policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Principal" : {
+          "Federated" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}"
+        },
+        "Action" : "sts:AssumeRoleWithWebIdentity",
+        "Condition" : {
+          "StringEquals" : {
+            "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:sub" : "system:serviceaccount:kube-system:aws-load-balancer-controller3",
+            "${replace(data.aws_eks_cluster.cluster.identity[0].oidc[0].issuer, "https://", "")}:aud" : "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = {
+    "alpha.eksctl.io/cluster-name"                = data.aws_eks_cluster.cluster.name
+    "alpha.eksctl.io/iamserviceaccount-name"      = "kube-system/aws-load-balancer-controller3"
+    "alpha.eksctl.io/eksctl-version"              = "0.175.0"
+    "eksctl.cluster.k8s.io/v1alpha1/cluster-name" = data.aws_eks_cluster.cluster.name
+  }
+}
+
+# AWS Load Balancer Controller IAM role policy attachment
+resource "aws_iam_role_policy_attachment" "aws-load-balancer-controller-policy-attachment" {
+  role       = aws_iam_role.alb_iam_role.name
+  policy_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/AWSLoadBalancerControllerIAMPolicy"
+}
+
+resource "kubernetes_service_account" "service-account" {
+  metadata {
+    name      = "aws-load-balancer-controller"
+    namespace = "kube-system"
+    labels = {
+      "app.kubernetes.io/name"      = "aws-load-balancer-controller"
+      "app.kubernetes.io/component" = "controller"
+    }
+    annotations = {
+      "eks.amazonaws.com/role-arn"               = aws_iam_role.alb_iam_role.arn
+      "eks.amazonaws.com/sts-regional-endpoints" = "true"
+    }
+  }
+}
+
 # Remember to remove created load balancer because it is not managed by terraform by deleting the ingress k8s resources
 module "alb" {
   source                   = "./modules/aws-alb"
@@ -102,6 +146,7 @@ module "alb" {
   helm_chart_name          = "aws-load-balancer-controller"
   helm_chart_release_name  = "aws-load-balancer-controller"
   helm_chart_version       = "1.7.2"
+  alb_iam_role = aws_iam_role.alb_iam_role.arn
 
-  depends_on = [module.eks]
+  depends_on = [module.eks, kubernetes_service_account.service-account]
 }
