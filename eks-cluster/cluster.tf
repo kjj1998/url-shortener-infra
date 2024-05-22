@@ -20,7 +20,7 @@ terraform {
 }
 
 provider "aws" {
-  region  = var.aws_region
+  region = var.aws_region
   # profile = "admin-1"
 }
 
@@ -146,7 +146,7 @@ module "alb" {
   helm_chart_name          = "aws-load-balancer-controller"
   helm_chart_release_name  = "aws-load-balancer-controller"
   helm_chart_version       = "1.7.2"
-  alb_iam_role = aws_iam_role.alb_iam_role.arn
+  alb_iam_role             = aws_iam_role.alb_iam_role.arn
 
   depends_on = [module.eks, kubernetes_service_account.service-account]
 }
