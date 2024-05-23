@@ -53,9 +53,9 @@ resource "aws_db_instance" "db" {
   backup_window                         = "19:23-19:53"
   copy_tags_to_snapshot                 = true
   maintenance_window                    = "Thu:14:44-Thu:15:14"
-  storage_encrypted = true
+  storage_encrypted                     = true
   # final_snapshot_identifier = "url-shortener-db-iac-2024-04-28-00-44"
-  skip_final_snapshot = true
-  apply_immediately = true
+  skip_final_snapshot                 = true
+  apply_immediately                   = true
   iam_database_authentication_enabled = true
 }

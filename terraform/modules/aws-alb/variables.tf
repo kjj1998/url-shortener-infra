@@ -1,16 +1,16 @@
 variable "alb_service_account_name" {
-    description = "The name of the service account to create for the AWS Load Balancer Controller"
-    type        = string
+  description = "The name of the service account to create for the AWS Load Balancer Controller"
+  type        = string
 }
 
 variable "cluster_name" {
-    description = "The name of the EKS cluster"
-    type        = string
+  description = "The name of the EKS cluster"
+  type        = string
 }
 
 variable "region" {
-    description = "The AWS region"
-    type        = string
+  description = "The AWS region"
+  type        = string
 }
 
 variable "helm_chart_name" {

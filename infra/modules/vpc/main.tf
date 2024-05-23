@@ -1,4 +1,6 @@
+##############################################################################################
 # VPC
+##############################################################################################
 resource "aws_vpc" "vpc" {
   cidr_block           = "10.0.0.0/16"
   instance_tenancy     = "default"
@@ -9,7 +11,10 @@ resource "aws_vpc" "vpc" {
   }
 }
 
+##############################################################################################
 # Public subnets
+##############################################################################################
+
 resource "aws_subnet" "public_subnet_1" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = "10.0.0.0/19"
@@ -31,7 +36,10 @@ resource "aws_subnet" "public_subnet_2" {
   }
 }
 
+##############################################################################################
 # Private subnets
+##############################################################################################
+
 resource "aws_subnet" "private_subnet_1" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = "10.0.128.0/19"
@@ -51,7 +59,10 @@ resource "aws_subnet" "private_subnet_2" {
   }
 }
 
+##############################################################################################
 # Internet gateway
+##############################################################################################
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
@@ -60,7 +71,10 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
+##############################################################################################
 # Elastic IPs
+##############################################################################################
+
 resource "aws_eip" "nat_gateway_1_eip" {
   domain = "vpc"
 }
@@ -69,8 +83,10 @@ resource "aws_eip" "nat_gateway_2_eip" {
   domain = "vpc"
 }
 
-
+##############################################################################################
 # Nat gateways
+##############################################################################################
+
 resource "aws_nat_gateway" "private_subnet_nat_gateway_1" {
   connectivity_type = "public"
   subnet_id         = aws_subnet.public_subnet_1.id
@@ -80,8 +96,6 @@ resource "aws_nat_gateway" "private_subnet_nat_gateway_1" {
     Name = var.nat_gateway_name_1
   }
 
-  # To ensure proper ordering, it is recommended to add an explicit dependency
-  # on the Internet Gateway for the VPC.
   depends_on = [aws_internet_gateway.igw]
 }
 
@@ -94,12 +108,13 @@ resource "aws_nat_gateway" "private_subnet_nat_gateway_2" {
     Name = var.nat_gateway_name_2
   }
 
-  # To ensure proper ordering, it is recommended to add an explicit dependency
-  # on the Internet Gateway for the VPC.
   depends_on = [aws_internet_gateway.igw]
 }
 
+##############################################################################################
 # Public subnet route table
+##############################################################################################
+
 resource "aws_route_table" "public_rtb" {
   vpc_id = aws_vpc.vpc.id
 
@@ -113,7 +128,10 @@ resource "aws_route_table" "public_rtb" {
   }
 }
 
+##############################################################################################
 # Private subnet route tables
+##############################################################################################
+
 resource "aws_route_table" "private_rtb_1" {
   vpc_id = aws_vpc.vpc.id
 
@@ -126,6 +144,7 @@ resource "aws_route_table" "private_rtb_1" {
     Name = var.private_subnet_route_table_1_name
   }
 }
+
 resource "aws_route_table" "private_rtb_2" {
   vpc_id = aws_vpc.vpc.id
 
@@ -139,19 +158,25 @@ resource "aws_route_table" "private_rtb_2" {
   }
 }
 
+#############################################################################################
 # Route associations
+#############################################################################################
+
 resource "aws_route_table_association" "public_subnet_1_public_rtb_association" {
   subnet_id      = aws_subnet.public_subnet_1.id
   route_table_id = aws_route_table.public_rtb.id
 }
+
 resource "aws_route_table_association" "public_subnet_2_public_rtb_association" {
   subnet_id      = aws_subnet.public_subnet_2.id
   route_table_id = aws_route_table.public_rtb.id
 }
+
 resource "aws_route_table_association" "private_subnet_1_private_rtb_association" {
   subnet_id      = aws_subnet.private_subnet_1.id
   route_table_id = aws_route_table.private_rtb_1.id
 }
+
 resource "aws_route_table_association" "private_subnet_2_private_rtb_association" {
   subnet_id      = aws_subnet.private_subnet_2.id
   route_table_id = aws_route_table.private_rtb_2.id

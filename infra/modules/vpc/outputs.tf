@@ -1,7 +1,12 @@
+##############################################################################
+# Output values
+##############################################################################
+
 output "vpc_id" {
   description = "ID of the vpc"
   value       = aws_vpc.vpc.id
 }
+
 output "public_subnet_1_id" {
   description = "ID of the public subnet 1"
   value       = aws_subnet.public_subnet_1.id
@@ -36,4 +41,3 @@ output "nat_gateway_2_id" {
   description = "ID of the nat gateway 2"
   value       = aws_nat_gateway.private_subnet_nat_gateway_2.id
 }
-
