@@ -73,6 +73,9 @@ jobs:
       - name: update kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
 
+      - name: check access
+        run: kubectl get svc
+
       - name: check context
         run: kubectl config get-contexts
 
