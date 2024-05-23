@@ -50,16 +50,16 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
-      - name: Change directory to load-balancer-controller
-        run: cd ../load-balancer-controller
-
       - name: Terraform init
+        working-directory: ./load-balancer-controller
         run: terraform init
 
       - name: Terraform Plan
+        working-directory: ./load-balancer-controller
         run: terraform plan -input=false
 
       - name: Terraform Apply
+        working-directory: ./load-balancer-controller
         run: terraform apply -auto-approve
       # - name: Kubectl tool installer
       #   uses: Azure/setup-kubectl@v4.0.0
