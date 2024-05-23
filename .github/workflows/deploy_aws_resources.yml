@@ -77,7 +77,7 @@ jobs:
         run: kubectl config get-contexts
 
       - name: check iam entity
-        run: eksctl get iamidentitymapping --cluster ${{ env.EKS_CLUSTER_NAME }}
+        run: kubectl describe configmap aws-auth -n kube-system
 
       - name: Terraform init
         working-directory: ./load-balancer-controller
