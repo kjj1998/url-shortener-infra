@@ -77,9 +77,9 @@ jobs:
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
           aws-region: ${{ env.AWS_REGION }}
         
-      - name: Map IAM entity to aws-auth ConfigMap
-        run: |
-          eksctl create iamidentitymapping --cluster ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --arn arn:aws:sts::271407076537:assumed-role/GitHubAction-url-shortener-infra/GitHub_to_AWS_via_FederatedOIDC
+      # - name: Map IAM entity to aws-auth ConfigMap
+      #   run: |
+      #     eksctl create iamidentitymapping --cluster ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --arn arn:aws:sts::271407076537:assumed-role/GitHubAction-url-shortener-infra/GitHub_to_AWS_via_FederatedOIDC
       
       - name: update kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
