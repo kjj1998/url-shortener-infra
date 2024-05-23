@@ -50,6 +50,9 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
+      - name: test eks
+        run: aws eks get token --cluster-name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --role arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra
+
       - name: Terraform init
         working-directory: ./load-balancer-controller
         run: terraform init
