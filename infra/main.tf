@@ -39,6 +39,30 @@ module "vpc" {
   private_subnet_route_table_2_name = "url-shortener-cluster-vpc-rtb-private-2-iac"
 }
 
+module "elasticache" {
+  source                            = "./modules/aws-elasticache"
+  elasticache_security_group_vpc_id = module.vpc.vpc_id
+  private_subnet_ids = [
+    module.vpc.private_subnet_1_id,
+    module.vpc.private_subnet_2_id,
+  ]
+  elasticache_security_group_name  = "url-shortener-cache-security-group-iac"
+  elasticache_replication_group_id = "url-shortener-cache-non-cluster-iac"
+  elasticache_subnet_group_name    = "url-shortener-cache-subnet-group-iac"
+  cluster_security_group_id        = module.eks.cluster_security_group
+}
+
+module "rds" {
+  source                    = "./modules/aws-rds"
+  rds_security_group_vpc_id = module.vpc.vpc_id
+  rds_security_group_name   = "url-shortener-rds-security-group-iac"
+  public_subnet_ids = [
+    module.vpc.public_subnet_1_id,
+    module.vpc.public_subnet_2_id,
+  ]
+  rds_subnet_group_name = "url-shortener-rds-subnet-group-iac"
+}
+
 module "eks" {
   source                   = "./modules/eks-cluster"
   cluster_name             = "url-shortener-cluster-iac"

@@ -69,17 +69,6 @@ jobs:
 
       - name: test eks
         run: aws eks get-token --cluster-name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4.0.1
-        with:
-          role-to-assume: arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra # change to reflect your IAM role’s ARN
-          role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ env.AWS_REGION }}
-        
-      # - name: Map IAM entity to aws-auth ConfigMap
-      #   run: |
-      #     eksctl create iamidentitymapping --cluster ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --arn arn:aws:sts::271407076537:assumed-role/GitHubAction-url-shortener-infra/GitHub_to_AWS_via_FederatedOIDC
       
       - name: update kubeconfig
         run: aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
@@ -105,6 +94,11 @@ jobs:
         working-directory: ./load-balancer-controller
         run: terraform apply -auto-approve
       
+      - name: apply ingress and namespace k8s resources
+        working-directory: ./eks
+        run: |
+          kubectl apply -f namespace.yaml
+          kubectl apply -f ingress.yaml
      
 
       # - name: add IAM for cluster access
@@ -132,13 +126,3 @@ jobs:
       # - name: Terraform Apply
       #   working-directory: ./terraform-cluster
       #   run: terraform apply -auto-approve
-
-      # - name: apply ingress and namespace k8s resources
-      #   working-directory: ./eks
-      #   run: |
-      #     kubectl apply -f namespace.yaml
-      #     kubectl apply -f ingress.yaml
-      
-     
-
-     
