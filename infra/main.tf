@@ -20,7 +20,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region  = var.aws_region
   # profile = "admin-1"
 }
 
@@ -40,7 +40,7 @@ module "vpc" {
 }
 
 module "elasticache" {
-  source                            = "./modules/aws-elasticache"
+  source                            = "./modules/elasticache"
   elasticache_security_group_vpc_id = module.vpc.vpc_id
   private_subnet_ids = [
     module.vpc.private_subnet_1_id,
@@ -53,7 +53,7 @@ module "elasticache" {
 }
 
 module "rds" {
-  source                    = "./modules/aws-rds"
+  source                    = "./modules/rds"
   rds_security_group_vpc_id = module.vpc.vpc_id
   rds_security_group_name   = "url-shortener-rds-security-group-iac"
   public_subnet_ids = [
