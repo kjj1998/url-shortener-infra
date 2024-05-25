@@ -87,6 +87,7 @@ resource "kubernetes_namespace" "example" {
 resource "kubernetes_ingress_v1" "ingress-url-shortener" {
   metadata {
     name = "ingress-url-shortener"
+    namespace = "url-shortener"
 
     annotations = {
       "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
