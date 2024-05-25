@@ -15,13 +15,13 @@ terraform {
     region         = "ap-southeast-1"
     dynamodb_table = "terraform-remote-locks-url-shortener-cluster"
     encrypt        = true
-    # profile        = "admin-1"
+    profile        = "admin-1"
   }
 }
 
 provider "aws" {
-  region = var.aws_region
-  # profile = "admin-1"
+  region  = var.aws_region
+  profile = "admin-1"
 }
 
 module "aws-load-balancer-controller" {
