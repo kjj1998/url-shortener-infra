@@ -20,8 +20,8 @@ terraform {
 }
 
 provider "aws" {
-  region  = var.aws_region
-  profile = "admin-1"/
+  region = var.aws_region
+  # profile = "admin-1"
 }
 
 module "vpc" {
