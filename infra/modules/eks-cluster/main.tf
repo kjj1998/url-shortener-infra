@@ -85,6 +85,18 @@ resource "aws_eks_access_policy_association" "github_access_policy_association" 
 }
 
 #####################################################################################
+# Allow access from control plane to webhook port of AWS load balancer controller
+#####################################################################################
+
+resource "aws_security_group_rule" "eks_control_plane_to_webhook" {
+  type              = "ingress"
+  from_port         = 9443
+  to_port           = 9443
+  protocol          = "tcp"
+  security_group_id = aws_eks_cluster.cluster.vpc_config[0].cluster_security_group_id
+}
+
+#####################################################################################
 # IAM role for EKS cluster node group
 #####################################################################################
 
