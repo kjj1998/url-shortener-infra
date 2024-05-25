@@ -7,6 +7,7 @@ on:
 env:
   AWS_REGION : ap-southeast-1
   EKS_CLUSTER_NAME: url-shortener-cluster-iac
+  TF_VAR_GITHUB: true
     
 permissions:
       id-token: write
@@ -54,6 +55,9 @@ jobs:
         uses:  hashicorp/setup-terraform@v3.0.0
         with:
           terraform_version: "1.8.3"
+
+      - name: Echo env variables
+        run: echo ${{env}}
       
       - name: Terraform init
         run: terraform init
@@ -96,11 +100,11 @@ jobs:
         working-directory: ./load-balancer-controller
         run: terraform apply -auto-approve
       
-      - name: apply ingress and namespace k8s resources
-        working-directory: ./eks
-        run: |
-          kubectl apply -f namespace.yaml
-          kubectl apply -f ingress.yaml
+      # - name: apply ingress and namespace k8s resources
+      #   working-directory: ./eks
+      #   run: |
+      #     kubectl apply -f namespace.yaml
+      #     kubectl apply -f ingress.yaml
      
 
       # - name: add IAM for cluster access

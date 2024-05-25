@@ -34,3 +34,8 @@ module "aws-load-balancer-controller" {
   helm_chart_release_name                           = "aws-load-balancer-controller"
   helm_chart_version                                = "1.8.0"
 }
+
+module "namespace-and-ingress" {
+  source       = "./modules/namespace-and-ingress"
+  cluster_name = "url-shortener-cluster-iac"
+}
