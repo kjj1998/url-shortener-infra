@@ -36,7 +36,7 @@ module "aws-load-balancer-controller" {
 }
 
 module "namespace-and-ingress" {
-  source       = "./modules/namespace-and-ingress"
-  cluster_name = "url-shortener-cluster-iac"
+  source          = "./modules/namespace-and-ingress"
+  cluster_name    = "url-shortener-cluster-iac"
   node_group_name = "url-shortener-cluster-node-group-iac"
 }
