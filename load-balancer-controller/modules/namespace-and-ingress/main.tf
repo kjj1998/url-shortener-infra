@@ -43,7 +43,7 @@ resource "kubernetes_namespace" "example" {
   }
 }
 
-resource "kubernetes_ingress" "ingress-url-shortener" {
+resource "kubernetes_ingress_v1" "ingress-url-shortener" {
   metadata {
     name = "ingress-url-shortener"
 
@@ -58,8 +58,12 @@ resource "kubernetes_ingress" "ingress-url-shortener" {
       http {
         path {
           backend {
-            service_name = "service-url-shortener"
-            service_port = 80
+            service {
+              name = "service-url-shortener"
+              port {
+                number = 80
+              }
+            }
           }
 
           path = "/url-shortener"
@@ -67,8 +71,12 @@ resource "kubernetes_ingress" "ingress-url-shortener" {
 
         path {
           backend {
-            service_name = "service-url-shortener-auth"
-            service_port = 80
+            service {
+              name = "service-url-shortener-auth"
+              port {
+                number = 80
+              }
+            }
           }
 
           path = "/url-shortener-auth"
