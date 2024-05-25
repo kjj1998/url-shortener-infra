@@ -8,6 +8,11 @@ data "aws_eks_cluster" "cluster" {
   name = var.cluster_name
 }
 
+data "aws_eks_node_group" "node_group" {
+  cluster_name    = var.cluster_name
+  node_group_name = var.node_group_name
+}
+
 data "aws_caller_identity" "current" {
 
 }
@@ -123,4 +128,17 @@ resource "kubernetes_ingress_v1" "ingress-url-shortener" {
 
     ingress_class_name = "alb"
   }
+}
+
+#####################################################################################
+# Allow access from control plane to webhook port of AWS load balancer controller
+#####################################################################################
+
+resource "aws_security_group_rule" "eks_control_plane_to_webhook" {
+  type              = "ingress"
+  from_port         = 9443
+  to_port           = 9443
+  protocol          = "tcp"
+  security_group_id = data.aws_eks_node_group.node_group.resources[0].remote_access_security_group_id
+  source_security_group_id = data.aws_eks_cluster.cluster.vpc_config[0].cluster_security_group_id
 }
