@@ -86,7 +86,7 @@ resource "kubernetes_ingress_v1" "ingress-url-shortener" {
     annotations = {
       "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
       "alb.ingress.kubernetes.io/target-type" = "ip"
-      "alb.ingress.kubernetes.io/role-arn"            = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra"
+      "alb.ingress.kubernetes.io/role-arn"    = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra"
     }
   }
 
