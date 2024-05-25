@@ -17,6 +17,42 @@ data "aws_eks_cluster_auth" "cluster_auth" {
 }
 
 ############################################################################################################
+# Create Kubernetes Role Bindings
+############################################################################################################
+
+resource "kubernetes_role" "ingress_role" {
+  metadata {
+    name      = "ingress-role"
+    namespace = "default"
+  }
+
+  rule {
+    api_groups = ["networking.k8s.io"]
+    resources  = ["ingresses"]
+    verbs      = ["get", "list", "watch", "create", "update", "patch", "delete"]
+  }
+}
+
+resource "kubernetes_role_binding" "ingress_role_binding" {
+  metadata {
+    name      = "ingress-role-binding"
+    namespace = "default"
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.ingress_role.metadata[0].name
+  }
+
+  subject {
+    kind      = "User"
+    name      = "arn:aws:sts::271407076537:assumed-role/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8/jjkoh"
+    api_group = "rbac.authorization.k8s.io"
+  }
+}
+
+############################################################################################################
 # Create Kubernetes Namespace and Ingress for Cluster
 ############################################################################################################
 
@@ -50,7 +86,7 @@ resource "kubernetes_ingress_v1" "ingress-url-shortener" {
     annotations = {
       "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
       "alb.ingress.kubernetes.io/target-type" = "ip"
-      "eks.amazonaws.com/role-arn" = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra"
+      "alb.ingress.kubernetes.io/role-arn"            = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra"
     }
   }
 

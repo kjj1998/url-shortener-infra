@@ -76,6 +76,10 @@ resource "kubernetes_service_account" "example" {
   metadata {
     name      = var.aws_load_balancer_controller_service_account_name
     namespace = var.namespace
+
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.aws_lb_iam_role.arn
+    }
   }
 
   automount_service_account_token = true
