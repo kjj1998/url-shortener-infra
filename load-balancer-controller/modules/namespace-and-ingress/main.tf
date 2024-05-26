@@ -74,7 +74,7 @@ provider "kubernetes" {
   # config_path = "/home/runner/.kube/config"
 }
 
-resource "kubernetes_namespace" "example" {
+resource "kubernetes_namespace_v1" "example" {
   metadata {
     labels = {
       "kubernetes.io/metadata.name" = "url-shortener"
@@ -93,6 +93,7 @@ resource "kubernetes_ingress_v1" "ingress-url-shortener" {
       "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
       "alb.ingress.kubernetes.io/target-type" = "ip"
       "alb.ingress.kubernetes.io/role-arn"    = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra"
+      "kubernetes.io/ingress.class" = "alb"
     }
   }
 
