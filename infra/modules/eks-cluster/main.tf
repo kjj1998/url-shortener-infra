@@ -52,13 +52,17 @@ resource "aws_eks_cluster" "cluster" {
   }
 }
 
-resource "aws_eks_access_entry" "cluster_access_entry" {
+#####################################################################################
+# EKS cluster access entries
+#####################################################################################
+
+resource "aws_eks_access_entry" "console_access_entry" {
   cluster_name  = aws_eks_cluster.cluster.name
   principal_arn = "arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8"
   type          = "STANDARD"
 }
 
-resource "aws_eks_access_policy_association" "access_policy_association" {
+resource "aws_eks_access_policy_association" "console_access_policy_association" {
   cluster_name  = aws_eks_cluster.cluster.name
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
   principal_arn = "arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8"
@@ -68,13 +72,13 @@ resource "aws_eks_access_policy_association" "access_policy_association" {
   }
 }
 
-resource "aws_eks_access_entry" "github_access_entry" {
+resource "aws_eks_access_entry" "infra_github_access_entry" {
   cluster_name  = aws_eks_cluster.cluster.name
   principal_arn = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra"
   type          = "STANDARD"
 }
 
-resource "aws_eks_access_policy_association" "github_access_policy_association" {
+resource "aws_eks_access_policy_association" "infra_github_access_policy_association" {
   cluster_name  = aws_eks_cluster.cluster.name
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
   principal_arn = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra"
@@ -94,6 +98,22 @@ resource "aws_eks_access_policy_association" "url_shortener_service_github_acces
   cluster_name  = aws_eks_cluster.cluster.name
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
   principal_arn = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener"
+
+  access_scope {
+    type = "cluster"
+  }
+}
+
+resource "aws_eks_access_entry" "url_shortener_auth_service_github_access_entry" {
+  cluster_name  = aws_eks_cluster.cluster.name
+  principal_arn = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-auth"
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "url_shortener_auth_service_github_access_policy_association" {
+  cluster_name  = aws_eks_cluster.cluster.name
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+  principal_arn = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-auth"
 
   access_scope {
     type = "cluster"

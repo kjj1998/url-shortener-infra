@@ -76,9 +76,9 @@ provider "kubernetes" {
 
 resource "kubernetes_namespace_v1" "example" {
   metadata {
-    labels = {
-      "kubernetes.io/metadata.name" = "url-shortener"
-    }
+    # labels = {
+    #   "kubernetes.io/metadata.name" = "url-shortener"
+    # }
 
     name = "url-shortener"
   }
@@ -86,14 +86,13 @@ resource "kubernetes_namespace_v1" "example" {
 
 resource "kubernetes_ingress_v1" "ingress-url-shortener" {
   metadata {
-    name = "ingress-url-shortener"
+    name      = "ingress-url-shortener"
     namespace = "url-shortener"
 
     annotations = {
       "alb.ingress.kubernetes.io/scheme"      = "internet-facing"
       "alb.ingress.kubernetes.io/target-type" = "ip"
       "alb.ingress.kubernetes.io/role-arn"    = "arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra"
-      "kubernetes.io/ingress.class" = "alb"
     }
   }
 
@@ -110,7 +109,8 @@ resource "kubernetes_ingress_v1" "ingress-url-shortener" {
             }
           }
 
-          path = "/url-shortener"
+          path      = "/url-shortener"
+          path_type = "Prefix"
         }
 
         path {
@@ -123,11 +123,11 @@ resource "kubernetes_ingress_v1" "ingress-url-shortener" {
             }
           }
 
-          path = "/url-shortener-auth"
+          path      = "/url-shortener-auth"
+          path_type = "Prefix"
         }
       }
     }
-
     ingress_class_name = "alb"
   }
 }
