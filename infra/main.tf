@@ -15,13 +15,13 @@ terraform {
     region         = "ap-southeast-1"
     dynamodb_table = "terraform-remote-locks-url-shortener"
     encrypt        = true
-    # profile        = "admin-1"
+    profile        = "admin-1"
   }
 }
 
 provider "aws" {
-  region = var.aws_region
-  # profile = "admin-1"
+  region  = var.aws_region
+  profile = "admin-1"
 }
 
 module "vpc" {
@@ -80,38 +80,3 @@ module "eks" {
     module.vpc.private_subnet_2_id,
   ]
 }
-
-# data "aws_eks_cluster_auth" "cluster" {
-#   name = module.eks.cluster_name
-
-#   depends_on = [module.eks]
-# }
-
-# provider "helm" {
-#   kubernetes {
-#     host  = module.eks.cluster_endpoint
-#     token = data.aws_eks_cluster_auth.cluster.token
-#     # exec {
-#     #   api_version = "client.authentication.k8s.io/v1beta1"
-#     #   args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-#     #   command     = "aws"
-#     # }
-#     cluster_ca_certificate = base64decode(module.eks.cluster_ca_cert)
-#   }
-# }
-
-# data "aws_caller_identity" "current" {}
-
-# # Remember to remove created load balancer because it is not managed by terraform by deleting the ingress k8s resources
-# module "alb" {
-#   source                   = "./modules/aws-alb"
-#   cluster_name             = module.eks.cluster_name
-#   region                   = "ap-southeast-1"
-#   namespace                = "kube-system"
-#   alb_service_account_name = "aws-load-balancer-controller3"
-#   helm_chart_name          = "aws-load-balancer-controller"
-#   helm_chart_release_name  = "aws-load-balancer-controller"
-#   helm_chart_version       = "1.8.0"
-#   vpc_id                   = module.vpc.vpc_id
-#   depends_on               = [module.eks]
-# }
