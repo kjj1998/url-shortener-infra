@@ -15,13 +15,13 @@ permissions:
 
 jobs:
   deploy_aws_resources:
-    name: 'Deploy AWS resources'
+    name: 'Deploy AWS VPC, RDS, Elasticache and EKS resources for URL shortener app'
     runs-on: ubuntu-latest
 
     defaults:
       run:
         shell: bash
-        working-directory: ./infra
+        working-directory: ./terraform/infra
 
     steps:
       - name: Git clone the repository
@@ -88,47 +88,53 @@ jobs:
       - name: check iam entity
         run: kubectl describe configmap aws-auth -n kube-system
 
-      - name: Terraform init
-        working-directory: ./load-balancer-controller
-        run: terraform init
-
-      - name: Terraform Plan
-        working-directory: ./load-balancer-controller
-        run: terraform plan -input=false
-
-      - name: Terraform Apply
-        working-directory: ./load-balancer-controller
-        run: terraform apply -auto-approve
-      
-      # - name: apply ingress and namespace k8s resources
-      #   working-directory: ./eks
-      #   run: |
-      #     kubectl apply -f namespace.yaml
-      #     kubectl apply -f ingress.yaml
-     
-
-      # - name: add IAM for cluster access
-      #   # run: eksctl create iamidentitymapping --cluster ${{ env.EKS_CLUSTER_NAME }} --region ${{ env.AWS_REGION }} --arn arn:aws:iam::271407076537:role/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --no-duplicate-arns --username admin
-      #   run: |
-      #     aws eks create-access-entry --cluster-name ${{ env.EKS_CLUSTER_NAME }} --principal-arn arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --type STANDARD
-      #     aws eks associate-access-policy --cluster-name ${{ env.EKS_CLUSTER_NAME }} --principal-arn arn:aws:iam::271407076537:role/aws-reserved/sso.amazonaws.com/ap-southeast-1/AWSReservedSSO_AdministratorAccess_bfc8bbbd1715d5e8 --access-scope type=cluster --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy
-
-      # # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       # - name: Terraform init
-      #   working-directory: ./terraform-cluster
+      #   working-directory: ./terraform/load-balancer-controller
       #   run: terraform init
-    
-      # # Checks that all Terraform configuration files adhere to a canonical format
-      # - name: Terraform Format
-      #   working-directory: ./terraform-cluster
-      #   run: terraform fmt -check
 
-      # # Generates an execution plan for Terraform
       # - name: Terraform Plan
-      #   working-directory: ./terraform-cluster
+      #   working-directory: ./terraform/load-balancer-controller
       #   run: terraform plan -input=false
 
-      # # Apply the changes required to reach the desired state of the configuration
       # - name: Terraform Apply
-      #   working-directory: ./terraform-cluster
+      #   working-directory: ./load-balancer-controller
       #   run: terraform apply -auto-approve
+      
+  deploy_aws_load_balancer_controller:
+    needs: [deploy_aws_resources]
+    name: 'Deploy AWS Load Balancer Controller for the EKS cluster'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform/load-balancer-controller
+
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          role-to-assume: arn:aws:iam::271407076537:role/GitHubAction-url-shortener-infra # change to reflect your IAM role’s ARN
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: AWS Whoami
+        run: aws sts get-caller-identity
+
+      - name: Setup Terraform with specified version on the runner
+        uses:  hashicorp/setup-terraform@v3.0.0
+        with:
+          terraform_version: "1.8.3"
+
+      - name: Terraform init
+        run: terraform init
+  
+      - name: Terraform Plan
+        run: terraform plan -input=false
+  
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+      
