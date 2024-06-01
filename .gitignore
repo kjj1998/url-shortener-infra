@@ -1,7 +1,7 @@
 # Local .terraform directories
 **/.terraform/*
-./infra/.terraform/*
-./load-balancer-controller/.terraform/*
+./terraform/infra/.terraform/*
+./terraform/load-balancer-controller/.terraform/*
 
 # .tfstate files
 *.tfstate
